@@ -42,7 +42,7 @@ export default function CreateEventScreen({ navigation }: any) {
     const dispatch = useDispatch();
     const description = useSelector((state: RootState) => state.event.description);
     const date = useSelector((state:RootState) => state.event.date);
-    const userId = useSelector((state:RootState) => state.user.user_id);
+    const userId:any = useSelector((state:RootState) => state.user.user_id);
     const eventLocation = useSelector((state: RootState) => state.event.location);
 
     const [ isDescSubmited, setIsDescSubmited] = useState(false);
@@ -164,7 +164,7 @@ export default function CreateEventScreen({ navigation }: any) {
                                     title: "Balade",
                                     location: eventLocation,
                                     description: description,
-                                    creator: userId,
+                                    creator: parseInt(userId),
                                     picture: "none",
                                     date: "20/11/12"
                                 } 

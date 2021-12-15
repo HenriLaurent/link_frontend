@@ -52,32 +52,32 @@ export default function EventComponent({ navigation }: any) {
                         users: event.users,
                         date: event.date
                     })}>
-                    <Box style={styles.eventItem}>
-                        <Image source={photo} style={{ width: "40%", height: "100%" }} />
-                        <Box style={styles.eventContent}>
-                            <Text style={styles.eventTitle}>{event.title}</Text>
-                            <Divider my="1" />
-                            <Box style={styles.eventDetail}>
-                                <Text style={styles.eventDetailTitle}>Lieu :</Text>
-                                <Text style={styles.eventDetailDescription}>{event.location}</Text>
+                        <Box key={event.id} style={styles.eventItem}>
+                            <Image source={photo} style={{ width: "40%", height: "100%" }} />
+                            <Box  key={event.id}  style={styles.eventContent}>
+                                <Text style={styles.eventTitle}>{event.title}</Text>
+                                <Divider my="1" />
+                                <Box  key={event.id}  style={styles.eventDetail}>
+                                    <Text style={styles.eventDetailTitle}>Lieu :</Text>
+                                    <Text style={styles.eventDetailDescription}>{event.location}</Text>
+                                </Box>
+                                <Box  key={event.id}  style={styles.eventDetail}>
+                                    <Text style={styles.eventDetailTitle}>Participants :</Text>
+                                    <Text style={styles.eventDetailDescription}>{event.users.length}</Text>
+                                </Box>
+                                <Box key={event.id}  style={styles.eventDetail}>
+                                    <Text style={styles.eventDetailTitle}>Date :</Text>
+                                    <Text style={styles.eventDetailDescription}>{event.date}</Text>
+                                </Box>
+                                <Box key={event.id}  style={styles.eventDetail}>
+                                    <Text style={styles.eventDetailTitle}>Description :</Text>
+                                </Box>
+                                <Text key={event.id}  style={styles.eventDescription}>
+                                    {event.description}
+                                </Text>
                             </Box>
-                            <Box style={styles.eventDetail}>
-                                <Text style={styles.eventDetailTitle}>Participants :</Text>
-                                <Text style={styles.eventDetailDescription}>{event.users.length}</Text>
-                            </Box>
-                            <Box style={styles.eventDetail}>
-                                <Text style={styles.eventDetailTitle}>Date :</Text>
-                                <Text style={styles.eventDetailDescription}>{event.date}</Text>
-                            </Box>
-                            <Box style={styles.eventDetail}>
-                                <Text style={styles.eventDetailTitle}>Description :</Text>
-                            </Box>
-                            <Text style={styles.eventDescription}>
-                                {event.description}
-                            </Text>
                         </Box>
-                    </Box>
-                </Pressable>
+                    </Pressable>
                 )
             })
         )
@@ -106,15 +106,15 @@ export default function EventComponent({ navigation }: any) {
             </Box>
             <SafeAreaView style={styles.eventContainer} >
                 <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-                    
-                {data.events.length !== 0 ? (
-                    <DisplayEvents/>
-                ): (
-                    <Text>No results</Text>
-                )}
+
+                    {data.events.length !== 0 ? (
+                        <DisplayEvents />
+                    ) : (
+                        <Text>No results</Text>
+                    )}
                 </ScrollView>
             </SafeAreaView>
-            </View>
+        </View>
     )
 }
 
