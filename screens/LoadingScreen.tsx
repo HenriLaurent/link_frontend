@@ -7,6 +7,8 @@ import { NativeBaseProvider, Button } from 'native-base';
 import * as WebBrowser from 'expo-web-browser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { gql, useLazyQuery, useQuery, useMutation } from '@apollo/client';
+import { Ionicons } from '@expo/vector-icons'; 
+
 
 
 
@@ -45,10 +47,6 @@ export default function LoadingScreen({ navigation }: any) {
   const googleLogged = useSelector((state: RootState) => state.user.loggedInWithGoogle);
   const id = useSelector((state: RootState) => state.user.user_id);
   const user = useSelector((state: RootState) => state.user.user);
-  const userCity = useSelector((state: RootState) => state.user.localization.city);
-  const { latitude, longitude } = useSelector((state: RootState) => state.user.localization);
-  const isUserLogged = useSelector((state: RootState) => state.user.loggedIn);
-  const [test, setTest] = useState("");
 
 
   const { loading, error, data, refetch }: any = useQuery(GET_USER, {
@@ -62,27 +60,6 @@ export default function LoadingScreen({ navigation }: any) {
 
     }
   });
-
-  /*   const [getUser, { called, loading, data }] = useLazyQuery(
-      GET_USER,
-      {
-        variables: { google_id: user.google_id },
-        onCompleted: () => {
-          console.log('request completed', data)
-          handleData(data);
-  
-        },
-      }
-    ); */
-
-  /*   useEffect(() => {
-      console.log('googlelogged value changed')
-      if(googleLogged) {
-        console.log('fetching', called)
-        getUser();
-        console.log('fetched', data)
-      }
-    }, [data]) */
 
 
   const [createUser, res] = useMutation(CREATE_USER, {
@@ -263,9 +240,18 @@ export default function LoadingScreen({ navigation }: any) {
             <Spinner style={styles.spinner} size="lg" color="white" />
           )}
           {!showSpinner && (
-            <Button onPress={() => {
+            <Button
+            
+            _text={{
+              color:'red',
+              backgroundColor:'blue',
+              fontSize:20
+            }}
+            style={styles.googleConnect}
+            leftIcon={<Ionicons name="logo-google" size={24} color="red" />}
+             onPress={() => {
               promptAsync();
-            }}>Load greeting</Button>
+            }}>Google</Button>
           )}
         </LinearGradient>
       </View>
@@ -291,5 +277,9 @@ const styles = StyleSheet.create({
   },
   spinner: {
     marginTop: 50,
+  },
+  googleConnect: {
+    marginTop:50,
+    width: 200,
   }
 });
