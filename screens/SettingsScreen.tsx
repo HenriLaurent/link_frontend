@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, ScrollView, SafeAreaView, TouchableHighlight } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { Box, Pressable, Divider, Input, Button, Avatar } from 'native-base';
+import { Box, Pressable, Divider, Input, Button, Avatar, Modal } from 'native-base';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -10,6 +10,30 @@ import photo from '../assets/images/profil.jpeg';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { loggedIn, loggedInWithGoogle, resetState } from '../store/actions/user.action';
+import { gql, useLazyQuery, useQuery } from '@apollo/client';
+
+
+const GET_INTERESTS = gql`
+    query SearchInterest($title: String!) {
+        searchInterest(title: $title) {
+        title
+        id
+        }
+    }
+`;
+
+const ADD_INTEREST = gql`
+mutation AddInterestToUser($userId: ID!, $interestId: ID!) {
+    addInterestToUser(userId: $userId, interestId: $interestId) {
+      first_name
+      interests {
+        title
+      }
+    }
+  }
+`
+
+
 
 
 export default function SettingsScreen() {
@@ -22,6 +46,33 @@ export default function SettingsScreen() {
             dispatch(resetState());
         })
     }
+
+    const [showInterestModal, setShowInterestModal] = useState(false);
+    const [inputSearch, setInputSearch] = useState('');
+
+    function InterestsBySearch(props: any) {
+        const { loading, error, data } = useQuery(GET_INTERESTS, {
+            variables: { title: props.title },
+        });
+
+        if (loading) return <Text>Loading </Text>
+        if (error) return <Text>`Error! ${error.message}`</Text>;
+        if (data.searchInterest.length === 0) {
+            return (
+                <Box>
+                    <Text>Aucun résulat ne correspond à ta recherche</Text>
+                </Box>
+            )
+        } else {
+            return data.searchInterest.map((interest: any) => (
+                <Box key={interest.id}>
+                    <Text>{interest.title}</Text>
+                </Box>
+            )
+            );
+        }
+    };
+
 
     return (
         <View style={styles.container}>
@@ -105,10 +156,51 @@ export default function SettingsScreen() {
                             <Text style={styles.badge}>Escalade</Text>
                         </LinearGradient>
                     </Box>
+                    <Button onPress={() => setShowInterestModal(true)} style={{ backgroundColor: "#EF2D56", borderRadius: 50 }}>Ajouter un intérêt</Button>
                 </Box>
             </Box>
             <Button style={{ backgroundColor: "#EF2D56", borderRadius: 50 }}>Modifier le compte</Button>
+            <Modal isOpen={showInterestModal} onClose={() => setShowInterestModal(false)}>
+                <Modal.Content >
+                    <Modal.CloseButton />
+                    <Modal.Header>Ajouter un intérêt</Modal.Header>
+                    <Modal.Body>
+                        <Input
+                            value={inputSearch}
+                            onChangeText={(text) => setInputSearch(text)}
+                            h={20}
+                            placeholder="Ecrivez votre description ici ..."
+                            w={{
+                                base: "100%",
+                                md: "10%",
+                            }}
+                        />
 
+                        <InterestsBySearch title={inputSearch} />
+
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button.Group space={2}>
+                            <Button
+                                variant="ghost"
+                                colorScheme="blueGray"
+                                onPress={() => {
+                                    setShowInterestModal(false);
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onPress={() => {
+                                    setShowInterestModal(false);
+                                }}
+                            >
+                                Save
+                            </Button>
+                        </Button.Group>
+                    </Modal.Footer>
+                </Modal.Content>
+            </Modal>
         </View>
     );
 }
