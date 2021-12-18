@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, ScrollView, SafeAreaView, TouchableHighlight } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { Box, Pressable, Divider, Input, Button, Avatar, Modal } from 'native-base';
+import { Box, Pressable, Divider, Input, Button, Avatar, Modal, Spinner } from 'native-base';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -10,7 +10,7 @@ import photo from '../assets/images/profil.jpeg';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { loggedIn, loggedInWithGoogle, resetState } from '../store/actions/user.action';
-import { gql, useLazyQuery, useQuery } from '@apollo/client';
+import { gql, useLazyQuery, useMutation, useQuery } from '@apollo/client';
 
 
 const GET_INTERESTS = gql`
@@ -39,7 +39,7 @@ mutation AddInterestToUser($userId: ID!, $interestId: ID!) {
 export default function SettingsScreen() {
 
     const user = useSelector((state: RootState) => state.user.user);
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
 
     const removeLogin = async () => {
         await AsyncStorage.removeItem('@isLogged').then(() => {
@@ -51,12 +51,17 @@ export default function SettingsScreen() {
     const [inputSearch, setInputSearch] = useState('');
 
     function InterestsBySearch(props: any) {
+        const id = useSelector((state: RootState) => state.user.user_id)
         const { loading, error, data } = useQuery(GET_INTERESTS, {
             variables: { title: props.title },
         });
 
+        const [addInterest, res] = useMutation(ADD_INTEREST);
+        console.log(res.data, 'res')
+
         if (loading) return <Text>Loading </Text>
         if (error) return <Text>`Error! ${error.message}`</Text>;
+        if(res.loading) return <Spinner size="lg" color="black" />
         if (data.searchInterest.length === 0) {
             return (
                 <Box>
@@ -64,12 +69,30 @@ export default function SettingsScreen() {
                 </Box>
             )
         } else {
-            return data.searchInterest.map((interest: any) => (
-                <Box key={interest.id}>
-                    <Text>{interest.title}</Text>
-                </Box>
+            return (
+                <ScrollView style={{ height: 300 }}>
+                    <SafeAreaView>
+                        {
+                            data.searchInterest.map((interest: any) => {
+                                return (
+                                    <Box style={{width:"100%", height:50, justifyContent:"center", borderBottomWidth:2, borderBottomColor:"#eee"}} key={interest.id}>
+                                        <Button
+                                        _text={{
+                                            color: "#1F2937",
+                                          }}
+                                        style={styles.iButton}
+                                         onPress={() => {
+                                            console.log(id, interest.id, typeof id, typeof interest.id)
+                                            addInterest({
+                                            variables: {userId:id, interestId: interest.id }
+                                        })}}>{interest.title}</Button>
+                                    </Box>
+                                )
+                            })
+                        }
+                    </SafeAreaView>
+                </ScrollView>
             )
-            );
         }
     };
 
@@ -160,15 +183,15 @@ export default function SettingsScreen() {
                 </Box>
             </Box>
             <Button style={{ backgroundColor: "#EF2D56", borderRadius: 50 }}>Modifier le compte</Button>
-            <Modal isOpen={showInterestModal} onClose={() => setShowInterestModal(false)}>
+            <Modal size='xl' isOpen={showInterestModal} onClose={() => setShowInterestModal(false)}>
                 <Modal.Content >
                     <Modal.CloseButton />
                     <Modal.Header>Ajouter un intérêt</Modal.Header>
-                    <Modal.Body>
+                    <Modal.Body style={{ height: 300 }}>
                         <Input
                             value={inputSearch}
                             onChangeText={(text) => setInputSearch(text)}
-                            h={20}
+                            h={10}
                             placeholder="Ecrivez votre description ici ..."
                             w={{
                                 base: "100%",
@@ -179,26 +202,7 @@ export default function SettingsScreen() {
                         <InterestsBySearch title={inputSearch} />
 
                     </Modal.Body>
-                    <Modal.Footer>
-                        <Button.Group space={2}>
-                            <Button
-                                variant="ghost"
-                                colorScheme="blueGray"
-                                onPress={() => {
-                                    setShowInterestModal(false);
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onPress={() => {
-                                    setShowInterestModal(false);
-                                }}
-                            >
-                                Save
-                            </Button>
-                        </Button.Group>
-                    </Modal.Footer>
+                    
                 </Modal.Content>
             </Modal>
         </View>
@@ -255,6 +259,11 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent",
         color: "white",
         borderRadius: 50,
+    },
+    iButton:{
+        height:"100%",
+         width:"100%",
+          backgroundColor:'white'
     }
 
 
